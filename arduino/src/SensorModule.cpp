@@ -1,41 +1,28 @@
-#include <SensorModule.h>
+#include "SensorModule.h"
 
-SensorModule::SensorModule() : dht(DHTPIN, DHTTYPE) {}
-
-void SensorModule::begin()
-{
-    dht.begin();
+SensorModule::SensorModule(int dhtPin, int dhtType, int soilMoisturePin) {
+  dht = new DHT(dhtPin, dhtType);
+  this->soilMoisturePin = soilMoisturePin;
 }
 
-void SensorModule::readSensors()
-{
-    temperature = dht.readTemperature();
-    humidity = dht.readHumidity();
-    soilMoisture = analogRead(MOISTURE_PIN);
+void SensorModule::begin() {
+  dht->begin();
 }
 
-void SensorModule::printData() {
-    if (isnan(humidity) || isnan(temperature)) {
-    Serial.println("Failed to read from DHT sensor!");
-    return;
-  }
-
-  Serial.print("Temp: ");
-  Serial.print(temperature);
-  Serial.print(", Hum: ");
-  Serial.print(humidity);
-  Serial.print(", Soil: ");
-  Serial.println(soilMoisture);
-}
-
-float SensorModule::getHumidity() {
-    return humidity;
+void SensorModule::readSensors() {
+  temperature = dht->readTemperature();
+  humidity = dht->readHumidity();
+  soilMoisture = analogRead(soilMoisturePin);
 }
 
 float SensorModule::getTemperature() {
-    return temperature;
+  return temperature;
+}
+
+float SensorModule::getHumidity() {
+  return humidity;
 }
 
 int SensorModule::getSoilMoisture() {
-    return soilMoisture;
+  return soilMoisture;
 }

@@ -3,22 +3,18 @@
 
 #include <DHT.h>
 
-#define DHTPIN 8
-#define DHTTYPE DHT11
-#define MOISTURE_PIN A0
-
 class SensorModule {
   private:
-    DHT dht;
+    DHT* dht;
+    int soilMoisturePin;
     float temperature;
     float humidity;
     int soilMoisture;
 
   public:
-    SensorModule();
+    SensorModule(int dhtPin, int dhtType, int soilMoisturePin);
     void begin();
     void readSensors();
-    void printData();
     float getTemperature();
     float getHumidity();
     int getSoilMoisture();
