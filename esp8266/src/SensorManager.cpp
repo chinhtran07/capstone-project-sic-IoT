@@ -28,9 +28,7 @@ bool SensorManager::readSensors(float& humidity, float& temperature, int& soilMo
 String SensorManager::readSerialData() {
     String data = "";
     while (sensorSerial.available()) {
-        char ch = sensorSerial.read();
-        if (ch == '\n') break;
-        data += ch;
+        data = sensorSerial.readString();
     }
     return data;
 }
