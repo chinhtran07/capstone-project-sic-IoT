@@ -3,6 +3,7 @@
 #include "RelayModule.h"
 #include "LCDModule.h"
 #include "UARTModule.h"
+#include <ArduinoJson.h>
 
 #define DHT_PIN 8
 #define DHT_TYPE DHT11
@@ -58,12 +59,13 @@ void loop()
   else
   {
     lcd.displayData(temperature, humidity, soilMoisture);
-    uart.send("Humidity:");
-    uart.send(String(humidity));
-    uart.send(";Temperature:");
-    uart.send(String(temperature));
-    uart.send(";SoilMoisture:");
-    uart.send(String(soilMoisture));
+    String json;
+    JsonDocument doc;
+    doc["temperature"] = temperature;
+    doc["humidity"] = humidity;
+    doc["soil moisture"] = soilMoisture;
+    serializeJson(doc, json);
+    uart.send(json);
   }
 
   relay.setState(relay.getState());

@@ -18,9 +18,8 @@ void MQTTManager::setup() {
     net.setTrustAnchors(&cert);
     net.setClientRSACert(&client_crt, &key);
     client.setServer(MQTT_HOST, 8883);
-    client.setCallback([this](char* topic, byte* payload, unsigned int length) {
-        this->messageReceived(topic, payload, length);
-    });
+    client.setCallback([this](char *topic, uint8_t *payload, unsigned int length)
+                       { this->messageReceived(topic, payload, length); });
     connectAWS();
 }
 
@@ -31,12 +30,6 @@ void MQTTManager::loop() {
         client.loop();
         if (millis() - lastMillis > 5000) {
             lastMillis = millis();
-
-            // Example data to publish
-            StaticJsonDocument<200> doc;
-            doc["time"] = millis();
-            doc["content"] = "Hello";
-            publishMessage(doc.as<JsonObject>());
         }
     }
 }
@@ -62,7 +55,7 @@ void MQTTManager::connectAWS() {
     }
 }
 
-void MQTTManager::messageReceived(char* topic, byte* payload, unsigned int length) {
+void MQTTManager::messageReceived(char* topic, uint8_t* payload, unsigned int length) {
     Serial.print("Received [");
     Serial.print(topic);
     Serial.print("]: ");
