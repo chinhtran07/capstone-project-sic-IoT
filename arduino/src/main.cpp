@@ -3,8 +3,9 @@
 #include "RelayModule.h"
 #include "LCDModule.h"
 #include "UARTModule.h"
+#include <ArduinoJson.h>
 
-#define DHT_PIN  8
+#define DHT_PIN 8
 #define DHT_TYPE DHT11
 #define SOIL_MOISTURE_PIN A0
 #define RELAY_PIN 13
@@ -24,7 +25,8 @@ volatile bool buttonPressed = false;
 
 void handleButtonPress();
 
-void setup() {
+void setup()
+{
   Serial.begin(9600);
   uart.begin(9600);
   sensor.begin();
@@ -35,8 +37,10 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), handleButtonPress, FALLING);
 }
 
-void loop() {
-  if (uart.receive().length() > 0) {
+void loop()
+{
+  if (uart.receive().length() > 0)
+  {
     String received = uart.receive();
     Serial.print("Received: ");
     Serial.println(received);
@@ -47,12 +51,21 @@ void loop() {
   float humidity = sensor.getHumidity();
   int soilMoisture = sensor.getSoilMoisture();
 
-  if (isnan(humidity) || isnan(temperature)) {
+  if (isnan(humidity) || isnan(temperature))
+  {
     lcd.displayMessage("DHTT11 Error");
     Serial.println("DHT11 Error: Invalid data");
-  } else {
+  }
+  else
+  {
     lcd.displayData(temperature, humidity, soilMoisture);
-    uart.send(String(temperature));
+    String json;
+    JsonDocument doc;
+    doc["temperature"] = temperature;
+    doc["humidity"] = humidity;
+    doc["soil moisture"] = soilMoisture;
+    serializeJson(doc, json);
+    uart.send(json);
   }
 
   relay.setState(relay.getState());
@@ -60,10 +73,12 @@ void loop() {
   delay(1000);
 }
 
-void handleButtonPress() {
+void handleButtonPress()
+{
   buttonPressed = true;
   delay(50);
-  if (buttonPressed) {
+  if (buttonPressed)
+  {
     relay.toggle();
     buttonPressed = false;
     Serial.print("Relay State: ");
