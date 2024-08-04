@@ -3,14 +3,14 @@
 #include "MQTTManager.h"
 #include <ArduinoJson.h>
 #include <SoftwareSerial.h>
-// #include "ThingSpeakManager.h"
-// #include "FirebaseManager.h"
+#include "ThingSpeakManager.h"
+// #include "FirebaseModule.h"
 #include "TimeManager.h"
 // #include "SensorManager.h"
 WiFiManagerWrapper wifiManager;
 MQTTManager awsManager;
-// ThingSpeakManager thingSpeakManager;
-// FirebaseManager firebaseManager;
+ThingSpeakManager thingSpeakManager;
+// FirebaseModule firebaseModule;
 TimeManager timeManager;
 // SensorManager sensorManager;
 SoftwareSerial sensor(D1, D2);
@@ -23,8 +23,8 @@ void setup() {
     wifiManager.setup();
     timeManager.setup();
     awsManager.setup();
-    // thingSpeakManager.setup();
-    // firebaseManager.setup();
+    thingSpeakManager.setup();
+    // firebaseModule.setup();
     // sensorManager.setup();
 }
 
@@ -39,11 +39,13 @@ void loop() {
         doc["soil moisture"] = soilMoisture;
 
         awsManager.publishMessage(doc.as<JsonObject>());
+        thingSpeakManager.sendData(temperature, humidity, soilMoisture);
+        // firebaseModule.sendData(1, 1.0);
     }
 
     awsManager.loop();
 
-    delay(1000); // Delay to prevent overloading services
+    delay(20000); // Delay to prevent overloading services
 }
 
 bool readDataFromUART(float &humidity, float &temperature, int &soilMoisture) {
