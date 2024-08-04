@@ -11,11 +11,12 @@ public:
     void setup();
     void loop();
     void publishMessage(const JsonObject& data);
-    void messageReceived(char* topic, uint8_t* payload, unsigned int length);
 private:
     WiFiClientSecure net;
     PubSubClient client;
     void connectAWS();
+    void messageReceived(char* topic, uint8_t* payload, unsigned int length);
+
 };
 
 #endif // MQTTMANAGER_H
