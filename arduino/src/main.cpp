@@ -4,6 +4,7 @@
 #include "LCDModule.h"
 #include "UARTModule.h"
 #include <ArduinoJson.h>
+#include <string.h>
 
 #define DHT_PIN 8
 #define DHT_TYPE DHT11
@@ -22,6 +23,7 @@ LCDModule lcd(LCD_ADDRESS, LCD_COLUMNS, LCD_ROWS);
 UARTModule uart(RX_PIN, TX_PIN);
 
 volatile bool buttonPressed = false;
+String signal;
 
 void handleButtonPress();
 
@@ -39,11 +41,10 @@ void setup()
 
 void loop()
 {
-  if (uart.receive().length() > 0)
-  {
-    String received = uart.receive();
-    Serial.print("Received: ");
-    Serial.println(received);
+  if (uart.receive(signal)) {
+    int state = signal.toInt();
+    relay.setState(state);
+    digitalWrite(BUTTON_PIN, state == 1 ? HIGH : LOW);
   }
 
   sensor.readSensors();
@@ -66,6 +67,14 @@ void loop()
     doc["soil moisture"] = soilMoisture;
     serializeJson(doc, json);
     uart.send(json);
+  }
+
+  if (soilMoisture < 600) {
+    relay.setState(true);
+    digitalWrite(BUTTON_PIN, LOW);
+  } else {
+    relay.setState(false);
+    digitalWrite(BUTTON_PIN, HIGH);
   }
 
   relay.setState(relay.getState());

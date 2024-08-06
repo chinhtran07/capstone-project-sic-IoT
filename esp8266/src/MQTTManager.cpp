@@ -12,13 +12,13 @@ BearSSL::X509List cert(cacert);
 BearSSL::X509List client_crt(client_cert);
 BearSSL::PrivateKey key(privkey);
 
-MQTTManager::MQTTManager() : client(net) {}
+MQTTManager::MQTTManager(SoftwareSerial& serial) : client(net), serial(serial) {}
 
 void MQTTManager::setup() {
     net.setTrustAnchors(&cert);
     net.setClientRSACert(&client_crt, &key);
     client.setServer(MQTT_HOST, 8883);
-    client.setCallback([this](char *topic, uint8_t *payload, unsigned int length)
+    client.setCallback([this](char *topic, byte *payload, unsigned int length)
                        { this->messageReceived(topic, payload, length); });
     connectAWS();
 }
@@ -55,12 +55,15 @@ void MQTTManager::connectAWS() {
     }
 }
 
-void MQTTManager::messageReceived(char* topic, uint8_t* payload, unsigned int length) {
-    Serial.print("Received [");
-    Serial.print(topic);
-    Serial.print("]: ");
+void MQTTManager::messageReceived(char* topic, byte* payload, unsigned int length) {
+    JsonDocument doc;
+    String message = "";
     for (int i = 0; i < length; i++) {
-        Serial.print((char)payload[i]);
+        message += (char)payload[i];
     }
+    deserializeJson(doc, message);
+    int signal = doc["message"];
+    Serial.print(signal);
+    serial.println(signal);
     Serial.println();
 }

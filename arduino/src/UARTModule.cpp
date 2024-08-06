@@ -12,9 +12,10 @@ void UARTModule::send(String message) {
   mySerial->println(message);
 }
 
-String UARTModule::receive() {
+bool UARTModule::receive(String &signal) {
   if (mySerial->available()) {
-    return mySerial->readString();
+    signal = mySerial->readStringUntil('\n');
+    return true;
   }
-  return "";
+  return false;
 }

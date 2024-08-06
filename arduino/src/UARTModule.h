@@ -11,7 +11,7 @@ class UARTModule {
     UARTModule(int rxPin, int txPin);
     void begin(long baudRate);
     void send(String message);
-    String receive();
+    bool receive(String &signal);
 };
 
 #endif
