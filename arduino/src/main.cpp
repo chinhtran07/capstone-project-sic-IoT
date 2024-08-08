@@ -5,6 +5,7 @@
 #include "UARTModule.h"
 #include <ArduinoJson.h>
 #include <string.h>
+#include <Ticker.h>
 
 #define DHT_PIN 8
 #define DHT_TYPE DHT11
@@ -23,9 +24,15 @@ LCDModule lcd(LCD_ADDRESS, LCD_COLUMNS, LCD_ROWS);
 UARTModule uart(RX_PIN, TX_PIN);
 
 volatile bool buttonPressed = false;
-String signal;
+unsigned long lastDebounceTime = 0;
+const unsigned long debounceDelay = 50;        // 50ms debounce delay
+bool lastButtonState = HIGH;                   // Lưu trạng thái trước đó của nút nhấn
+unsigned long timeBeginWatering = 0;           // Thời gian bắt đầu tưới
+const unsigned long timeWatering = 10 * 60000; // Thời gian tưới (10 phút)
+bool isWatering = false;                       // Trạng thái tưới nước
 
 void handleButtonPress();
+void updateRelayStatus();
 
 void setup()
 {
@@ -36,61 +43,106 @@ void setup()
   lcd.begin();
 
   pinMode(BUTTON_PIN, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), handleButtonPress, FALLING);
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), handleButtonPress, CHANGE);
 }
 
 void loop()
 {
-  if (uart.receive(signal)) {
-    int state = signal.toInt();
-    relay.setState(state);
-    digitalWrite(BUTTON_PIN, state == 1 ? HIGH : LOW);
+
+  String signal;
+  if (uart.receive(signal))
+  {
+    int control = signal.toInt();
+    relay.setState(control);
+    Serial.println(relay.getState() ? "ON" : "OFF");
+    isWatering = control;
   }
 
+  // Nếu đang tưới nước, kiểm tra nếu đã hết thời gian tưới
+  if (isWatering)
+  {
+    unsigned long currentTime = millis();
+    if (currentTime - timeBeginWatering >= timeWatering)
+    {
+      // Dừng tưới nước
+      relay.setState(false);
+      isWatering = false;
+      Serial.println("Watering completed.");
+      updateRelayStatus();
+    }
+    // Không kiểm tra độ ẩm khi đang tưới nước
+    return;
+  }
+
+  // Đọc giá trị cảm biến
   sensor.readSensors();
   float temperature = sensor.getTemperature();
   float humidity = sensor.getHumidity();
   int soilMoisture = sensor.getSoilMoisture();
 
-  if (isnan(humidity) || isnan(temperature))
+  // Kiểm tra dữ liệu cảm biến DHT11
+  if (isnan(temperature) || isnan(humidity))
   {
-    lcd.displayMessage("DHTT11 Error");
+    lcd.displayMessage("DHT11 Error");
     Serial.println("DHT11 Error: Invalid data");
   }
   else
   {
     lcd.displayData(temperature, humidity, soilMoisture);
-    String json;
+
+    // Tạo và gửi dữ liệu JSON qua UART
     JsonDocument doc;
     doc["temperature"] = temperature;
     doc["humidity"] = humidity;
-    doc["soil moisture"] = soilMoisture;
+    doc["soil_moisture"] = soilMoisture;
+    String json;
     serializeJson(doc, json);
     uart.send(json);
   }
 
-  if (soilMoisture < 600) {
+  // Điều khiển relay dựa trên độ ẩm đất
+  if (soilMoisture > 600)
+  {
     relay.setState(true);
-    digitalWrite(BUTTON_PIN, LOW);
-  } else {
-    relay.setState(false);
-    digitalWrite(BUTTON_PIN, HIGH);
+    timeBeginWatering = millis(); // Ghi lại thời gian bắt đầu tưới
+    isWatering = true;            // Đánh dấu trạng thái tưới nước
+    Serial.println("Watering started.");
+    updateRelayStatus();
   }
 
-  relay.setState(relay.getState());
-
+  // Đợi trước khi lặp lại
   delay(1000);
 }
 
 void handleButtonPress()
 {
-  buttonPressed = true;
-  delay(50);
-  if (buttonPressed)
+  unsigned long currentTime = millis();
+  bool buttonState = digitalRead(BUTTON_PIN);
+
+  // Chỉ xử lý khi có sự thay đổi trạng thái nút nhấn
+  if (buttonState != lastButtonState && (currentTime - lastDebounceTime) > debounceDelay)
   {
-    relay.toggle();
-    buttonPressed = false;
-    Serial.print("Relay State: ");
-    Serial.println(relay.getState() ? "ON" : "OFF");
+    lastDebounceTime = currentTime;
+
+    if (buttonState == LOW)
+    {
+      relay.toggle();
+      Serial.print("Relay State: ");
+      Serial.println(relay.getState() ? "ON" : "OFF");
+      isWatering = relay.getState();
+      updateRelayStatus();
+    }
   }
+
+  lastButtonState = buttonState; // Cập nhật trạng thái nút nhấn
+}
+
+void updateRelayStatus()
+{
+  JsonDocument doc;
+  doc["relay_status"] = relay.getState() ? "ON" : "OFF";
+  String data;
+  serializeJson(doc, data);
+  uart.send(data);
+  Serial.println(data);
 }
