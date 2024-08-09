@@ -49,13 +49,16 @@
         <mxCell id="8IZuK-_9ymfgup93Q2rC-35" value="" style="aspect=fixed;sketch=0;html=1;dashed=0;whitespace=wrap;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#2875E2;strokeColor=#ffffff;points=[[0.005,0.63,0],[0.1,0.2,0],[0.9,0.2,0],[0.5,0,0],[0.995,0.63,0],[0.72,0.99,0],[0.5,1,0],[0.28,0.99,0]];shape=mxgraph.kubernetes.icon2;kubernetesLabel=1;prIcon=api" vertex="1" parent="1">
           <mxGeometry x="-305" y="-300" width="50" height="48" as="geometry" />
         </mxCell>
-        <mxCell id="8IZuK-_9ymfgup93Q2rC-36" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="8IZuK-_9ymfgup93Q2rC-23" target="8IZuK-_9ymfgup93Q2rC-35">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
         <mxCell id="8IZuK-_9ymfgup93Q2rC-38" value="" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00BEF2;shape=mxgraph.azure.mobile_services;pointerEvents=1;" vertex="1" parent="1">
           <mxGeometry x="-112.5" y="-290" width="32.5" height="50" as="geometry" />
         </mxCell>
         <mxCell id="8IZuK-_9ymfgup93Q2rC-39" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.995;exitY=0.63;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="8IZuK-_9ymfgup93Q2rC-35" target="8IZuK-_9ymfgup93Q2rC-38">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-380" y="-240" as="sourcePoint" />
+            <mxPoint x="-330" y="-290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="8IZuK-_9ymfgup93Q2rC-40" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="8IZuK-_9ymfgup93Q2rC-35" target="8IZuK-_9ymfgup93Q2rC-23">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="-380" y="-240" as="sourcePoint" />
             <mxPoint x="-330" y="-290" as="targetPoint" />
